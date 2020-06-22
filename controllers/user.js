@@ -5,7 +5,8 @@ const passport = require('passport');
 const _ = require('lodash');
 const validator = require('validator');
 const mailChecker = require('mailchecker');
-const User = require('../models/User');
+const User = require('../models/User/User');
+const UserProfile = require('../models/User/UserProfile');
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -43,6 +44,7 @@ exports.postLogin = (req, res, next) => {
       req.flash('errors', info);
       return res.redirect('/login');
     }
+
     req.logIn(user, (err) => {
       if (err) { return next(err); }
       req.flash('success', { msg: 'Success! You are logged in.' });
@@ -99,20 +101,36 @@ exports.postSignup = (req, res, next) => {
   });
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (err) { return next(err); }
+    if (err) { return console.log(err); }
+    // if (err) throw err;
     if (existingUser) {
       req.flash('errors', { msg: 'Account with that email address already exists.' });
       return res.redirect('/signup');
     }
-    user.save((err) => {
-      if (err) { return next(err); }
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect('/');
+
+    saveUser = (theUser) => {
+      theUser.save((err) => {
+        if (err) { return next(err); }
+        req.logIn(theUser, (err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect('/');
+        });
       });
-    });
+    }
+
+    if (user.password) {
+      user.hashAndSalt(user.password)
+        .then((password) => {
+          user.password = password;
+          saveUser(user)
+        })
+    } else {
+      saveUser(user)
+    }
+
+
   });
 };
 
@@ -144,11 +162,8 @@ exports.postUpdateProfile = (req, res, next) => {
     if (err) { return next(err); }
     if (user.email !== req.body.email) user.emailVerified = false;
     user.email = req.body.email || '';
-    user.profile.name = req.body.name || '';
-    user.profile.gender = req.body.gender || '';
-    user.profile.location = req.body.location || '';
-    user.profile.website = req.body.website || '';
     user.save((err) => {
+      
       if (err) {
         if (err.code === 11000) {
           req.flash('errors', { msg: 'The email address you have entered is already associated with an account.' });
@@ -156,8 +171,23 @@ exports.postUpdateProfile = (req, res, next) => {
         }
         return next(err);
       }
-      req.flash('success', { msg: 'Profile information has been updated.' });
-      res.redirect('/account');
+
+      UserProfile.findById({user_id: req.user.id}, (err, userProfile) => {
+        if(!userProfile) {
+          userProfile = new UserProfile({user_id: req.user.id});
+        }
+        
+        userProfile.name = req.body.name || null;
+        userProfile.gender = req.body.gender || null;
+        userProfile.location = req.body.location || null;
+        userProfile.website = req.body.website || null;
+
+        userProfile.save((err) => {
+          req.flash('success', { msg: 'Profile information has been updated.' });
+          res.redirect('/account');
+
+        });
+      });
     });
   });
 };
@@ -192,7 +222,7 @@ exports.postUpdatePassword = (req, res, next) => {
  * Delete user account.
  */
 exports.postDeleteAccount = (req, res, next) => {
-  User.deleteOne({ _id: req.user.id }, (err) => {
+  User.deleteOne({ id: req.user.id }, (err) => {
     if (err) { return next(err); }
     req.logout();
     req.flash('info', { msg: 'Your account has been deleted.' });

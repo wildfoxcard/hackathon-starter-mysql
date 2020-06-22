@@ -16,15 +16,27 @@ const { OAuth2Strategy } = require('passport-oauth');
 const _ = require('lodash');
 const moment = require('moment');
 
-const User = require('../models/User');
+const User = require('../models/User/User');
+const UserProfile = require('../models/User/UserProfile');
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
+  console.log('user id', id)
   User.findById(id, (err, user) => {
-    done(err, user);
+    console.log('User Obj', user)
+    if (!user) {
+      done(err, user);
+      return;
+    }
+    
+    UserProfile.findOne({ user_id: user.id }).then((userProfile) => {
+      console.log('user profile', userProfile);
+      user.profile = userProfile || {};
+      done(err, user);
+    });
   });
 });
 
@@ -40,7 +52,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
     if (!user.password) {
       return done(null, false, { msg: 'Your account was registered using a sign-in provider. To enable password login, sign in using a provider, and then set a password under your user profile.' });
     }
-    user.comparePassword(password, (err, isMatch) => {
+    user.comparePassword(password, user.password, (err, isMatch) => {
       if (err) { return done(err); }
       if (isMatch) {
         return done(null, user);
@@ -556,15 +568,15 @@ passport.use('tumblr', new OAuthStrategy({
   callbackURL: '/auth/tumblr/callback',
   passReqToCallback: true
 },
-(req, token, tokenSecret, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'tumblr', accessToken: token, tokenSecret });
-    user.save((err) => {
-      done(err, user);
+  (req, token, tokenSecret, profile, done) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) { return done(err); }
+      user.tokens.push({ kind: 'tumblr', accessToken: token, tokenSecret });
+      user.save((err) => {
+        done(err, user);
+      });
     });
-  });
-}));
+  }));
 
 /**
  * Foursquare API OAuth.
@@ -577,15 +589,15 @@ passport.use('foursquare', new OAuth2Strategy({
   callbackURL: process.env.FOURSQUARE_REDIRECT_URL,
   passReqToCallback: true
 },
-(req, accessToken, refreshToken, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'foursquare', accessToken });
-    user.save((err) => {
-      done(err, user);
+  (req, accessToken, refreshToken, profile, done) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) { return done(err); }
+      user.tokens.push({ kind: 'foursquare', accessToken });
+      user.save((err) => {
+        done(err, user);
+      });
     });
-  });
-}));
+  }));
 
 /**
  * Steam API OpenID.
@@ -658,15 +670,15 @@ passport.use('pinterest', new OAuth2Strategy({
   callbackURL: process.env.PINTEREST_REDIRECT_URL,
   passReqToCallback: true
 },
-(req, accessToken, refreshToken, profile, done) => {
-  User.findById(req.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.tokens.push({ kind: 'pinterest', accessToken });
-    user.save((err) => {
-      done(err, user);
+  (req, accessToken, refreshToken, profile, done) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) { return done(err); }
+      user.tokens.push({ kind: 'pinterest', accessToken });
+      user.save((err) => {
+        done(err, user);
+      });
     });
-  });
-}));
+  }));
 
 /**
  * Intuit/QuickBooks API OAuth.
@@ -679,36 +691,36 @@ const quickbooksStrategyConfig = new OAuth2Strategy({
   callbackURL: `${process.env.BASE_URL}/auth/quickbooks/callback`,
   passReqToCallback: true
 },
-(res, accessToken, refreshToken, params, profile, done) => {
-  User.findById(res.user._id, (err, user) => {
-    if (err) { return done(err); }
-    user.quickbooks = res.query.realmId;
-    if (user.tokens.filter((vendor) => (vendor.kind === 'quickbooks'))[0]) {
-      user.tokens.some((tokenObject) => {
-        if (tokenObject.kind === 'quickbooks') {
-          tokenObject.accessToken = accessToken;
-          tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
-          tokenObject.refreshToken = refreshToken;
-          tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();
-          if (params.expires_in) tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
-          return true;
-        }
-        return false;
-      });
-      user.markModified('tokens');
-      user.save((err) => { done(err, user); });
-    } else {
-      user.tokens.push({
-        kind: 'quickbooks',
-        accessToken,
-        accessTokenExpires: moment().add(params.expires_in, 'seconds').format(),
-        refreshToken,
-        refreshTokenExpires: moment().add(params.x_refresh_token_expires_in, 'seconds').format()
-      });
-      user.save((err) => { done(err, user); });
-    }
+  (res, accessToken, refreshToken, params, profile, done) => {
+    User.findById(res.user.id, (err, user) => {
+      if (err) { return done(err); }
+      user.quickbooks = res.query.realmId;
+      if (user.tokens.filter((vendor) => (vendor.kind === 'quickbooks'))[0]) {
+        user.tokens.some((tokenObject) => {
+          if (tokenObject.kind === 'quickbooks') {
+            tokenObject.accessToken = accessToken;
+            tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
+            tokenObject.refreshToken = refreshToken;
+            tokenObject.refreshTokenExpires = moment().add(params.x_refresh_token_expires_in, 'seconds').format();
+            if (params.expires_in) tokenObject.accessTokenExpires = moment().add(params.expires_in, 'seconds').format();
+            return true;
+          }
+          return false;
+        });
+        user.markModified('tokens');
+        user.save((err) => { done(err, user); });
+      } else {
+        user.tokens.push({
+          kind: 'quickbooks',
+          accessToken,
+          accessTokenExpires: moment().add(params.expires_in, 'seconds').format(),
+          refreshToken,
+          refreshTokenExpires: moment().add(params.x_refresh_token_expires_in, 'seconds').format()
+        });
+        user.save((err) => { done(err, user); });
+      }
+    });
   });
-});
 passport.use('quickbooks', quickbooksStrategyConfig);
 refresh.use('quickbooks', quickbooksStrategyConfig);
 
