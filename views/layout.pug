@@ -24,6 +24,27 @@ html
     script(src='/js/lib/popper.min.js')
     script(src='/js/lib/bootstrap.min.js')
     script(src='/js/main.js')
+    
+    //- socket.io
+    //- script(src="/js/lib/socket.io.js")
+    if user && user.id
+      script(src='/socket.io/socket.io.js')
+      script.
+          //- let socket = io.connect();
+          //- socket.on('event', function (data) {
+          //-   console.log(data);
+          //-   socket.emit('respond', { message: 'Hey there, server!' });
+          //- });
+          $(document).ready(function() {
+
+            // Place JavaScript code here...
+            window.socket = io.connect("http://localhost:8080");
+            socket.on('notifications', function (data) {
+              console.log(data);
+              //- socket.emit('respond', { message: 'Hey there, server!' });
+            });
+
+          });
 
     // Google Analytics: change UA-XXXXX-X to be your site's ID
     script.

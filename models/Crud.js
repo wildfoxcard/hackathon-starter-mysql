@@ -2,9 +2,9 @@ const { ObjectModel } = require("objectmodel");
 const db = require("../config/db")
 const uuidv4 = require('uuid').v4;
 
-const crud = ({ tableName, defaultData }) => {
+const crud = ({ tableName, defaultData, isSoftDelete }) => {
     let isNewRecord = false;
-    let isSoftDelete = true;
+    isSoftDelete = isSoftDelete === false ? isSoftDelete :  true;
 
     function mainObj(data) {
 
@@ -15,7 +15,11 @@ const crud = ({ tableName, defaultData }) => {
 
         //map default Object
         for (prop in defaultData) {
-            this[prop] = defaultData[prop]
+            if (typeof(defaultData[prop]) === 'function') {
+                this[prop] = defaultData[prop].bind(this)
+            } else {
+                this[prop] = defaultData[prop]
+            }
         }
 
         //public: map data to this object
@@ -26,7 +30,6 @@ const crud = ({ tableName, defaultData }) => {
 
         this.getPublicProperties = () => {
             let publicProperties = Object.assign({}, this);
-            delete publicProperties.id
             return publicProperties
         }
 
@@ -55,6 +58,7 @@ const crud = ({ tableName, defaultData }) => {
                     });
                     //update
                 } else {
+                    delete publicProperties.id
                     if (mainObj.preUpdate) {
                         const blocking = mainObj.preInsert(self);
                     }
@@ -78,8 +82,12 @@ const crud = ({ tableName, defaultData }) => {
 
     mainObj.findById = async (id, cb) => {
         return new Promise((resolve, reject) => {
+            let isDeletedExtention = '';
+            if (isSoftDelete) {
+                isDeletedExtention = ` AND is_deleted = 0`;
+            }
 
-            db.query(`SELECT * FROM ${tableName} WHERE id = ${db.escape(id)}`, function (err, result, fields) {
+            db.query(`SELECT * FROM ${tableName} WHERE id = ${db.escape(id)}${isDeletedExtention}`, function (err, result, fields) {
                 result = result && result.length ? new mainObj(result[0]) : null;
                 if (err && !cb) {
                     console.error(err);

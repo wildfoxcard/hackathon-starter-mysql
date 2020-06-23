@@ -50,3 +50,28 @@ CREATE TABLE IF NOT EXISTS user_profile (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_deleted boolean not null default 0
 );
+
+
+CREATE TABLE IF NOT EXISTS user_notifications (
+    id char(36) NOT NULL PRIMARY KEY,   
+    user_id char(36) NOT NULL,
+    CONSTRAINT fk_notifications_user_id
+    FOREIGN KEY (user_id) 
+        REFERENCES users(id),
+    is_read boolean not null default 0,
+    url text NOT NULL,
+    message text NOT NULL,
+    type text NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_deleted boolean not null default 0
+);
+
+CREATE TABLE IF NOT EXISTS user_notifications_meta (
+    id char(36) NOT NULL PRIMARY KEY,
+    user_id char(36) NOT NULL,
+    CONSTRAINT fk_notifications_meta_user_id
+    FOREIGN KEY (user_id)
+        REFERENCES users(id),
+    number_since_viewed int not null default 0
+);

@@ -18,9 +18,9 @@ const passport = require('passport');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
+const { socketProcessing } = require('./services/socketsByUser')
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
-
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
@@ -44,6 +44,12 @@ const passportConfig = require('./config/passport');
  */
 const app = express();
 
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+
+
+
 /**
  * Connect to MongoDB.
  */
@@ -65,7 +71,8 @@ app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
 app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-app.use(expressStatusMonitor());
+// app.use(expressStatusMonitor());
+app.use(expressStatusMonitor({ websocket: io, port: app.get('port') }));
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),
@@ -74,7 +81,7 @@ app.use(sass({
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
+const sessionMiddleware = session({
   resave: true,
   saveUninitialized: true,
   secret: process.env.SESSION_SECRET,
@@ -83,7 +90,8 @@ app.use(session({
   //   url: process.env.MONGODB_URI,
   //   autoReconnect: true,
   // })
-}));
+});
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
@@ -122,6 +130,10 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/popper.js/d
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist'), { maxAge: 31557600000 }));
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
+//socket.io
+app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/socket.io-client/dist'), { maxAge: 31557600000 }));
+
+
 
 /**
  * Primary app routes.
@@ -259,9 +271,34 @@ if (process.env.NODE_ENV === 'development') {
 /**
  * Start Express server.
  */
-app.listen(app.get('port'), () => {
+server.listen(app.get('port'), () => {
   console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
   console.log('  Press CTRL-C to stop\n');
+});
+
+/**
+ * Socket.io
+ */
+io.use(function (socket, next) {
+  // Wrap the express middleware
+  sessionMiddleware(socket.request, {}, next);
+})
+
+io.on('connection', (socket) => {
+  const { passport } = socket.request.session;
+  if (passport && passport.user) {
+    var userId = passport.user;
+    socketProcessing.add(userId, socket);
+    // userSockets[userId] = socket;
+    var UserNotifications = require('./models/User/UserNotifications');
+    UserNotifications.send({url: "http://www.google.com", type: "test", message: "test", user_id: userId})
+  }
+  // socket.on('chat message', (msg) => {
+
+  // });
+  // socket.on("respond", (socket) => {
+  //   console.log("message" + msg)
+  // })
 });
 
 module.exports = app;
