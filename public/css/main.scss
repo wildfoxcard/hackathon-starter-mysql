@@ -1,184 +1,70 @@
-@import "themes/default/variables";
+/*!
+ * Vali Admin
+ * Author: Pratik Borsadiya
+ * ================================*/
 
-@import "node_modules/bootstrap/scss/bootstrap";
-@import "node_modules/@ladjs/bootstrap-social/bootstrap-social.scss";
-@import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
-@import "node_modules/@fortawesome/fontawesome-free/scss/brands";
-@import "node_modules/@fortawesome/fontawesome-free/scss/regular";
-@import "node_modules/@fortawesome/fontawesome-free/scss/solid";
+// 1 - TOOLS
+//---------------------------------------------------
 
-@import "themes/default/default";
+// This files are essential for the theme
+@import '1-tools/fonts';
+@import '1-tools/vars';
+@import '1-tools/customize-bootstrap';
+@import '1-tools/bootstrap-source/bootstrap';
 
-// Scaffolding
-// -------------------------
+// Vendor plugin files
+// Can be excluded based on your needs
+@import '1-tools/dataTables.bootstrap';
+@import '1-tools/bootstrap-datepicker';
+@import '1-tools/sweetalert';
+@import '1-tools/notify';
+@import '1-tools/select2/select2';
+@import '1-tools/pace';
+@import '1-tools/jqvmap';
+@import '1-tools/fullcalendar';
+@import '1-tools/dropzone-basic';
+@import '1-tools/dropzone';
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+// 2 - BASICS
+//---------------------------------------------------
 
-body {
-  padding-top: 80px;
-  margin-bottom: 75px;
-  font-size: 14px;
-}
+// This styles are essential for theme
+@import '2-basics/app';
+@import '2-basics/helpers';
 
-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 45px;
-  line-height: 45px;
+// 3 - Component
+//---------------------------------------------------
 
-  p, ul {
-    margin-bottom: 0;
-  }
-}
+@import '3-component/header';
+@import '3-component/sidebar';
+@import '3-component/sidebar-mini';
 
-// Input Fields
-// -------------------------
+// This styles are optional based on your preferance
+@import '3-component/dropdown';
+@import '3-component/button';
+@import '3-component/app-title';
+@import '3-component/tile';
+@import '3-component/custom-radio-n-checkbox';
+@import '3-component/toggle-button';
+@import '3-component/material-half-bg';
+@import '3-component/material-loader';
+@import '3-component/button-spinner';
+@import '3-component/widgets';
+@import '3-component/chat';
 
-textarea {
-  resize: vertical;
-}
+// Include the following style if you need RTL support
+// Also you will need to add dir="rtl" attribute to HTML tag
 
-// Navbar
-// -------------------------
+//@import '3-component/rtl';
 
-.navbar-nav img {
-  width: 30px;
-  min-height: 30px;
-  margin: -15px 15px -15px;
-}
+// 4 -Pages
+//---------------------------------------------------
 
-.navbar{
-  padding-top: 0px;
-  padding-bottom: 0px;
-  margin-bottom: 20px;
-  display: block;
-}
-
-.navbar-brand{
-  font-size: 18px;
-  float: left;
-}
-
-.navbar-toggler {
-  position: relative;
-  float: right;
-  margin-bottom: 8px;
-  margin-top: 8px;
-}
-
-.navbar-toggler-icon {
-  font-size: 16px;
-}
-
-.dropdown-menu {
-  left: initial;
-  right: 0;
-}
-
-// button raised definition
-// this button uses gradient for the background
-$btn-raised-color: rgb(51, 51, 51);
-$btn-raised-background: #f8f8f8;
-$btn-raised-border: rgb(204, 204, 204);
-$enable-gradients: true;
-
-.btn-raised {
-  @include button-variant(
-    $btn-raised-background,
-    $btn-raised-border,
-    $btn-raised-color
-  )
-}
-
-/*
-* Solves Bootstrap 4 issue
-* https://github.com/twbs/bootstrap/issues/25654
-*/
-/* Styles in sm disposition and up */
-@media (min-width: 576px) and (max-width: 767px) {
-  /* Solves bs4 bug */
-  .navbar-expand-md > .container,
-  .navbar-expand-lg > .container,
-  .navbar-expand-xl > .container {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-  }
-}
-
-/* Styles in md disposition and up */
-@media (min-width: 768px) and (max-width: 991px) {
-  /* Solves bs4 bug */
-  .navbar-expand-lg > .container,
-  .navbar-expand-xl > .container {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-  }
-}
-
-/* Styles in lg disposition and up */
-@media (min-width: 992px) and (max-width: 1199px) {
-  /* Solves bs4 bug */
-  .navbar-expand-xl > .container {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-  }
-}
-
-// Alerts
-// -------------------------
-
-.alert {
-  margin-top: 20px;
-}
-
-// Thumbnails
-// -------------------------
-
-.thumbnail {
-  padding: 0;
-  border-radius: 0;
-  box-shadow: 0 0 5px #ccc, inset 0 0 0 #000;
-}
-
-// Font Icons
-// -------------------------
-
-.fa {
-  margin-right: 6px;
-}
-
-.fab {
-  margin-right: 6px;
-}
-
-.fas {
-  margin-right: 6px;
-}
-
-.far {
-  margin-right: 6px;
-}
-
-// Basic Snapchat Button CSS
-.btn-snapchat {
-  background-color: #fffc00;
-  color: #000 !important;
-
-  &:hover, &:active {
-    background-color: #f1ef00;
-  }
-}
-
-// Basic Twitch Button CSS
-.btn-twitch {
-  background-color: #6441a5;
-  color: #FFF !important;
-
-  &:hover, &:active {
-    background-color: #503484;
-  }
-}
+// This styles are optional based on your preferance
+@import '4-pages/landing-page';
+@import '4-pages/docs';
+@import '4-pages/login-material';
+@import '4-pages/lockscreen-material';
+@import '4-pages/error-page';
+@import '4-pages/mailbox';
+@import '4-pages/user-profile';

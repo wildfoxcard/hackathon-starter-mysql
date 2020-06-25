@@ -1,4 +1,3 @@
-const { ObjectModel } = require("objectmodel");
 const db = require("../config/db")
 const uuidv4 = require('uuid').v4;
 

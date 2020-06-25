@@ -18,7 +18,14 @@ const passport = require('passport');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
-const { socketProcessing } = require('./services/socketsByUser')
+const { socketProcessing } = require('./services/socketsByUser');
+
+/**
+ * Controllers (route handlers).
+ */
+const graphqlHTTP = require("express-graphql");
+const graphqlSchema = require("./graphql-schema/schema")
+
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 /**
@@ -33,6 +40,11 @@ const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
+const notificationsController = require('./controllers/notifications');
+const userManagementController = require('./controllers/userManagement');
+const clientManagementController = require('./controllers/clientManagement');
+const errorsController = require('./controllers/errors');
+
 
 /**
  * API keys and Passport configuration.
@@ -135,10 +147,18 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/socket.io-c
 
 
 
+app.use("/graphql", graphqlHTTP({
+  schema: graphqlSchema,
+  graphiql: true
+}));
+
+
 /**
  * Primary app routes.
  */
-app.get('/', homeController.index);
+// app.get('/', homeController.index);
+app.get('/', userController.getLogin);
+app.post('/', userController.postLogin);
 app.get('/login', userController.getLogin);
 app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
@@ -157,6 +177,14 @@ app.post('/account/profile', passportConfig.isAuthenticated, userController.post
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
+
+/**
+ * Jiren Routes.
+ */
+app.get('/send-notifications', notificationsController.send);
+app.get('/user-management', userManagementController.index)
+app.get('/client-management', clientManagementController.index)
+app.get('/errors', errorsController.index)
 
 /**
  * API examples routes.
