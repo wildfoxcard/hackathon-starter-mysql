@@ -1,3 +1,9 @@
+
+@import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
+@import "node_modules/@fortawesome/fontawesome-free/scss/brands";
+@import "node_modules/@fortawesome/fontawesome-free/scss/regular";
+@import "node_modules/@fortawesome/fontawesome-free/scss/solid";
+
 /*!
  * Vali Admin
  * Author: Pratik Borsadiya
@@ -68,3 +74,4 @@
 @import '4-pages/error-page';
 @import '4-pages/mailbox';
 @import '4-pages/user-profile';
+

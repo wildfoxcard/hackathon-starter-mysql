@@ -3,7 +3,13 @@
  * Home page.
  */
 exports.index = (req, res) => {
-  res.render('home', {
+  try {
+    asdf
+
+  } catch (ex) {
+    console.error(ex)
+  }
+  res.render('dashboard/index', {
     title: 'Home'
   });
 };

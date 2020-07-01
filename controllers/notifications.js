@@ -3,7 +3,7 @@
  * Home page.
  */
 exports.send = (req, res) => {
-    res.render('send-notifications', {
+    res.render('notifications/send', {
       title: 'Send Notifications'
     });
   };

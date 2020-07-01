@@ -1,7 +1,7 @@
 /**
  * Module dependencies.
  */
-const dotenv = require('dotenv');
+const dotenv = require('dotenv').config({ path: '.env' });
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -24,19 +24,19 @@ const { socketProcessing } = require('./services/socketsByUser');
  * Controllers (route handlers).
  */
 const graphqlHTTP = require("express-graphql");
-const graphqlSchema = require("./graphql-schema/schema")
+const graphqlSchema = require("./graphql-schema/")
 
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-dotenv.config({ path: '.env' });
+// dotenv.config({ path: '.env' });
 
 /**
  * Controllers (route handlers).
  */
-const homeController = require('./controllers/dashboard');
+const dashboardController = require('./controllers/dashboard');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
@@ -112,7 +112,9 @@ app.use((req, res, next) => {
     // Multer multipart/form-data handling needs to occur before the Lusca CSRF check.
     next();
   } else {
-    lusca.csrf()(req, res, next);
+    lusca.csrf({
+      whitelist: ['/graphql', '/unfetch*']
+    })(req, res, next);
   }
 });
 app.use(lusca.xframe('SAMEORIGIN'));
@@ -144,6 +146,7 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
 //socket.io
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/socket.io-client/dist'), { maxAge: 31557600000 }));
+app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/datatables.net-buttons/js'), { maxAge: 31557600000 }));
 
 
 
@@ -156,7 +159,6 @@ app.use("/graphql", graphqlHTTP({
 /**
  * Primary app routes.
  */
-// app.get('/', homeController.index);
 app.get('/', userController.getLogin);
 app.post('/', userController.postLogin);
 app.get('/login', userController.getLogin);
@@ -181,6 +183,7 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 /**
  * Jiren Routes.
  */
+app.get('/dashboard', dashboardController.index);
 app.get('/send-notifications', notificationsController.send);
 app.get('/user-management', userManagementController.index)
 app.get('/client-management', clientManagementController.index)

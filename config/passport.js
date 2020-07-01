@@ -18,24 +18,26 @@ const moment = require('moment');
 
 const User = require('../models/User/User');
 const UserProfile = require('../models/User/UserProfile');
+const UserToken = require('../models/User/UserToken');
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-  console.log('user id', id)
   User.findById(id, (err, user) => {
-    console.log('User Obj', user)
     if (!user) {
       done(err, user);
       return;
     }
     
     UserProfile.findOne({ user_id: user.id }).then((userProfile) => {
-      console.log('user profile', userProfile);
       user.profile = userProfile || {};
-      done(err, user);
+
+      UserToken.find({user_id: id}, (err, tokens) => {
+        user.tokens = tokens || [];
+        done(err, user);
+      });
     });
   });
 });

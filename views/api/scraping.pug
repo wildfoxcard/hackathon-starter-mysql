@@ -1,27 +1,46 @@
 extends ../layouts/_layout
 
+block variables
+  - var activePage = 'api';
+
 block content
-  .pb-2.mt-2.mb-4.border-bottom
-    h2
-      i.fab.fa-hacker-news(style='color: #ff6600').fa-sm
-      | Web Scraping
+  .app-title
+    div
+      h1
+        i.fab.fa-hacker-news(style='color: #ff6600').fa-sm
+        | Web Scraping
 
-  .btn-group.d-flex(role='group')
-    a.btn.btn-primary(href='http://cheeriojs.github.io/cheerio/', target='_blank').w-100
-      i.fas.fa-info.fa-sm
-      | Cheerio Docs
-    a.btn.btn-primary(href='http://vimeo.com/31950192', target='_blank').w-100
-      i.fas.fa-film.fa-sm
-      | Cheerio Screencast
+    ul.app-breadcrumb.breadcrumb.side
+      li.breadcrumb-item
+        a(href="/dashboard")
+          i.fa.fa-home.fa-lg
+      li.breadcrumb-item
+        a(href="/api") APIs
+      li.breadcrumb-item
+        | Web Scraping
 
-  h3 Hacker News Frontpage
-  table.table.table-condensed
-    thead
-      tr
-        th №
-        th Title
-    tbody
-      each link, index in links
-        tr
-          td= index + 1
-          td!= link
+  .row
+    .col-md-12
+      .tile
+        .row
+          .col-lg-12
+
+            .btn-group.d-flex(role='group')
+              a.btn.btn-primary(href='http://cheeriojs.github.io/cheerio/', target='_blank').w-100
+                i.fas.fa-info.fa-sm
+                | Cheerio Docs
+              a.btn.btn-primary(href='http://vimeo.com/31950192', target='_blank').w-100
+                i.fas.fa-film.fa-sm
+                | Cheerio Screencast
+
+            h3 Hacker News Frontpage
+            table.table.table-condensed
+              thead
+                tr
+                  th №
+                  th Title
+              tbody
+                each link, index in links
+                  tr
+                    td= index + 1
+                    td!= link

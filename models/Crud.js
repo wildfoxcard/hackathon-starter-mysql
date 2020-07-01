@@ -5,7 +5,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
     let isNewRecord = false;
     isSoftDelete = isSoftDelete === false ? isSoftDelete :  true;
 
-    function mainObj(data) {
+    function autoCrud(data) {
 
         if (!data.id) {
             isNewRecord = true;
@@ -39,8 +39,8 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
 
                 //insert
                 if (isNewRecord) {
-                    if (mainObj.preInsert) {
-                        const blocking = mainObj.preInsert(self);
+                    if (autoCrud.preInsert) {
+                        const blocking = autoCrud.preInsert(self);
                     }
                     var query = db.query(`INSERT INTO ${tableName} SET ?`, publicProperties, function (err, result, fields) {
 
@@ -58,8 +58,8 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
                     //update
                 } else {
                     delete publicProperties.id
-                    if (mainObj.preUpdate) {
-                        const blocking = mainObj.preInsert(self);
+                    if (autoCrud.preUpdate) {
+                        const blocking = autoCrud.preInsert(self);
                     }
                     var query = db.query(`UPDATE ${tableName} SET ? WHERE id = ${db.escape(this.id)}`, publicProperties, function (err, result, fields) {
 
@@ -79,7 +79,43 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
         }
     }
 
-    mainObj.findById = async (id, cb) => {
+    autoCrud.find = async (obj, cb) => {
+        return new Promise((resolve, reject) => {
+            let sql = `SELECT * FROM ${tableName}`,
+                sqlParams = [];
+
+            if (!obj) {
+                obj = {};
+            }
+
+            if (isSoftDelete) {
+                obj.is_deleted = false;
+            }
+
+            for (var prop in obj) {
+                sqlParams.push(`${prop} = ${db.escape(obj[prop])}`)
+            }
+            sql = `${sql} WHERE ${sqlParams.join(' and ')}`;
+
+            db.query(sql, function (err, result, fields) {
+                let returningArray =[];
+                for (var i = 0; i < result.length; i++) {
+                    returningArray.push(new autoCrud(result[i]))
+                }
+                if (err && !cb) {
+                    console.error(err);
+                } else if (!err && cb) {
+                    cb(err, result, fields);
+                } else if (err && cb) {
+                    cb(err, null, null)
+                } else {
+                    resolve(result);
+                }
+            });
+        })
+    }
+
+    autoCrud.findById = async function(id, cb) {
         return new Promise((resolve, reject) => {
             let isDeletedExtention = '';
             if (isSoftDelete) {
@@ -87,7 +123,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
             }
 
             db.query(`SELECT * FROM ${tableName} WHERE id = ${db.escape(id)}${isDeletedExtention}`, function (err, result, fields) {
-                result = result && result.length ? new mainObj(result[0]) : null;
+                result = result && result.length ? new autoCrud(result[0]) : null;
                 if (err && !cb) {
                     console.error(err);
                 } else if (!err && cb) {
@@ -101,7 +137,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
         });
     }
 
-    mainObj.findOne = async (obj, cb) => {
+    autoCrud.findOne = async (obj, cb) => {
         return new Promise((resolve, reject) => {
             let sql = `SELECT * FROM ${tableName}`,
                 sqlParams = [];
@@ -117,7 +153,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
 
             // if connection is successful
             db.query(sql, function (err, result, fields) {
-                result = result && result.length ? new mainObj(result[0]) : null;
+                result = result && result.length ? new autoCrud(result[0]) : null;
                 if (err && !cb) {
                     console.error(err);
                 } else if (!err && cb) {
@@ -131,9 +167,9 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
         });
     }
 
-    mainObj.deleteOne = async (obj, cb) => {
+    autoCrud.deleteOne = async (obj, cb) => {
         return new Promise((resolve, reject) => {
-            mainObj.findOne(obj, (err, data) => {
+            autoCrud.findOne(obj, (err, data) => {
                 let sql = `SELECT * FROM ${tableName}`,
                     sqlParams = [];
                 for (var prop in obj) {
@@ -141,7 +177,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
                 }
                 sql = `${sql} WHERE ${sqlParams.join(' and ')} LIMIT 1`
 
-                mainObj.findOne(obj, (err, user) => {
+                autoCrud.findOne(obj, (err, user) => {
 
                     if (isSoftDelete) {
                         db.query(`UPDATE ${tableName} SET is_deleted = 1 WHERE id = ${db.escape(user.id)}`, function (err, result, fields) {
@@ -177,7 +213,7 @@ const crud = ({ tableName, defaultData, isSoftDelete }) => {
         });
     }
 
-    return mainObj;
+    return autoCrud;
 }
 
 module.exports = crud;

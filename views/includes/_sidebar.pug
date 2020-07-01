@@ -42,32 +42,32 @@ aside.app-sidebar
 		//- 				|  Widgets
 
 		li
-			a.app-menu__item(href='/user-management' class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/user-management' class={'active': activePage == 'user-management'})
 				i.app-menu__icon.fa.fa-address-card
 				span.app-menu__label User Management
 
 		li
-			a.app-menu__item(href='/client-management' class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/client-management' class={'active': activePage == 'client-management'})
 				i.app-menu__icon.fa.fa-users
 				span.app-menu__label Client Management
 
 		li
-			a.app-menu__item(href='/errors' class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/errors' class={'active': activePage == 'errors'})
 				i.app-menu__icon.fa.fa-bug
-				span.app-menu__label Errors
+				span.app-menu__label Server Errors
 
 		li
-			a.app-menu__item(href='/send-notifications' class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/send-notifications' class={'active': activePage == 'send-notifications'})
 				i.app-menu__icon.fa.fa-bell
 				span.app-menu__label Send Notifications
 				
 		li
-			a.app-menu__item(href='/api' class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/api' class={'active': activePage == 'api'})
 				i.app-menu__icon.fa.fa-key
 				span.app-menu__label APIs
 
 		li
-			a.app-menu__item(href='/graphql' target="_blank" class={'active': activePage == 'charts'})
+			a.app-menu__item(href='/graphql' target="_blank" class={'active': activePage == 'graphql'})
 				i.app-menu__icon.fa.fa-pie-chart
 				span.app-menu__label GraphQL
 		//- li.treeview(class={'is-expanded': activeGroup == 'forms'})
