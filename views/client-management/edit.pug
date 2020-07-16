@@ -1,0 +1,33 @@
+extends ../layouts/_layout
+
+block variables
+  - var activePage = 'user-management';
+
+block content
+    .app-title
+        div
+            h1
+                i.fa.fa-address-card
+                |  New Client
+
+    .row
+        .col-md-12
+            .tile
+                form( autocomplete="off")
+                    .tile-body
+                        .form-group
+                            label.col-form-label(for='inputDefault') Name
+                            input#inputDefault.form-control(type='text')
+                        .form-group
+                            label(for='exampleInputEmail1') Email address
+                            input#exampleInputEmail1.form-control(type='email', aria-describedby='emailHelp', placeholder='Enter email', name="email")
+                            //- small#emailHelp.form-text.text-muted We'll never share your email with anyone else.
+                        .form-group
+                            label(for='exampleInputPassword1') Password
+                            input#exampleInputPassword1.form-control(type='password', placeholder='Password',autocomplete="new-password")
+                        .form-group
+                            label(for='exampleInputPassword1') Confirm Password
+                            input#exampleInputPassword1.form-control(type='password', placeholder='Password')
+                                
+                    .tile-footer
+                        button.btn.btn-primary(type='submit') Submit

@@ -16,7 +16,9 @@
     "postinstall": "npm rebuild node-sass",
     "start": "nodemon app.js",
     "test": "nyc mocha --timeout=10000 --exit",
-    "lint": "eslint \"**/*.js\""
+    "lint": "eslint \"**/*.js\"",
+    "build-css": "node-sass public/css/main.scss public/css/main.css",
+    "watch-css": "nodemon -e scss -x \"npm run build-css\""
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
@@ -41,12 +43,14 @@
     "express-flash": "^0.0.2",
     "express-graphql": "^0.9.0",
     "express-handlebars": "^3.1.0",
+    "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.0",
     "express-socket.io-session": "^1.3.5",
     "express-status-monitor": "^1.2.8",
     "fbgraph": "^1.4.4",
     "googleapis": "^47.0.0",
     "graphql": "^15.1.0",
+    "graphql-playground-middleware-express": "^1.7.18",
     "graphql-tools": "^6.0.11",
     "instagram-node": "^0.5.8",
     "jquery": "^3.4.1",
@@ -62,7 +66,6 @@
     "mysql": "^2.18.1",
     "mysql-import": "^4.0.24",
     "node-quickbooks": "^2.0.33",
-    "node-sass": "^4.13.0",
     "node-sass-middleware": "^0.11.0",
     "nodemailer": "^6.4.3",
     "objectmodel": "^4.2.2",
@@ -99,6 +102,8 @@
     "eslint-plugin-chai-friendly": "^0.5.0",
     "eslint-plugin-import": "^2.20.1",
     "mocha": "^7.1.0",
+    "node-sass": "^4.14.1",
+    "nodemon": "^2.0.4",
     "nyc": "^15.0.0",
     "sinon": "^9.0.0",
     "supertest": "^5.0.0-0"

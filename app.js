@@ -5,6 +5,7 @@ const dotenv = require('dotenv').config({ path: '.env' });
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
@@ -19,6 +20,7 @@ const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 const { socketProcessing } = require('./services/socketsByUser');
+const expressPlayground = require('graphql-playground-middleware-express').default
 
 /**
  * Controllers (route handlers).
@@ -60,22 +62,6 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
 
-
-
-/**
- * Connect to MongoDB.
- */
-// mongoose.set('useFindAndModify', false);
-// mongoose.set('useCreateIndex', true);
-// mongoose.set('useNewUrlParser', true);
-// mongoose.set('useUnifiedTopology', true);
-// mongoose.connect(process.env.MONGODB_URI);
-// mongoose.connection.on('error', (err) => {
-//   console.error(err);
-//   console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));
-//   process.exit();
-// });
-
 /**
  * Express configuration.
  */
@@ -94,14 +80,18 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const sessionMiddleware = session({
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
   cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
-  // store: new MongoStore({
-  //   url: process.env.MONGODB_URI,
-  //   autoReconnect: true,
-  // })
+  store: new MySQLStore({
+    host: process.env.MYSQL_HOST,
+    port: process.env.MYSQL_PORT,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
+})
+  
 });
 app.use(sessionMiddleware);
 app.use(passport.initialize());
@@ -151,10 +141,9 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/datatables.
 
 
 app.use("/graphql", graphqlHTTP({
-  schema: graphqlSchema,
-  graphiql: true
+  schema: graphqlSchema
 }));
-
+app.get('/playground', expressPlayground({ endpoint: '/graphql' }))
 
 /**
  * Primary app routes.
@@ -183,11 +172,14 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 /**
  * Jiren Routes.
  */
-app.get('/dashboard', dashboardController.index);
-app.get('/send-notifications', notificationsController.send);
-app.get('/user-management', userManagementController.index)
-app.get('/client-management', clientManagementController.index)
-app.get('/errors', errorsController.index)
+app.get('/dashboard', passportConfig.isAuthenticated, dashboardController.index);
+app.get('/send-notifications', passportConfig.isAuthenticated, notificationsController.send);
+app.get('/user-management', passportConfig.isAuthenticated, userManagementController.index);
+app.get('/user-management/form', passportConfig.isAuthenticated, userManagementController.form);
+app.get('/client-management', passportConfig.isAuthenticated, clientManagementController.index);
+app.get('/client-management/new', passportConfig.isAuthenticated, clientManagementController.new);
+app.get('/client-management/edit/:id', passportConfig.isAuthenticated, clientManagementController.edit);
+app.get('/errors', passportConfig.isAuthenticated, errorsController.index);
 
 /**
  * API examples routes.

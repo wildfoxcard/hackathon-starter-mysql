@@ -83,7 +83,7 @@ exports.getSignup = (req, res) => {
  * POST /signup
  * Create a new local account.
  */
-exports.postSignup = (req, res, next) => {
+exports.postSignup = async (req, res, next) => {
   const validationErrors = [];
   if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
   if (!validator.isLength(req.body.password, { min: 8 })) validationErrors.push({ msg: 'Password must be at least 8 characters long' });
@@ -100,12 +100,17 @@ exports.postSignup = (req, res, next) => {
     password: req.body.password
   });
 
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
+  User.findOne({ email: req.body.email }, async (err, existingUser) => {
     if (err) { return console.log(err); }
     // if (err) throw err;
     if (existingUser) {
       req.flash('errors', { msg: 'Account with that email address already exists.' });
       return res.redirect('/signup');
+    }
+    
+    const isFirstUser = await User.isFirstUser();
+    if (isFirstUser) {
+      user.is_admin = true;
     }
 
     saveUser = (theUser) => {

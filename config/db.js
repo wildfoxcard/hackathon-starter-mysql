@@ -8,7 +8,8 @@ var db = mysql.createConnection({
   port: process.env.MYSQL_PORT, 
   user: process.env.MYSQL_USER, 
   password: process.env.MYSQL_PASSWORD, // corresponding password
-  database: process.env.MYSQL_DATABASE // use the specified database
+  database: process.env.MYSQL_DATABASE, // use the specified database
+  multipleStatements: true
 });
 
 module.exports = db;

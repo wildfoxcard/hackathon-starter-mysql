@@ -2,6 +2,7 @@ $(document).ready(function () {
   $("#sampleTable").DataTable({
     processing: true,
     serverSide: true,
+    sDom: "t",
     ajax: {
       url: "/graphql",
       type: "POST",
@@ -11,15 +12,6 @@ $(document).ready(function () {
         return json.data.users;
       },
     },
-    // columnDefs: [
-    //   {
-    //     targets: -1,
-    //     data: null,
-    //     defaultContent:
-    //       `<a href=""></a>`
-    //   },
-    // ]
-    // ,
     columns: [
       {
         data: "email",
@@ -29,25 +21,9 @@ $(document).ready(function () {
         data: null,
         display: "Action",
         render: function (data, type, row, meta) {
-          return `<a class="btn btn-warning" href="/user-management/user/${row.id}">Edit</a>`;
+          return `<a class="btn btn-warning" href="/user-management/form?id=${row.id}">Edit</a>`;
         },
       },
     ],
-    // dom: 'Bfrtip',
-    // buttons: [
-    //   {
-    //     text: "New User",
-    //     action: function (e, dt, node, config) {
-    //       window.location = "/user-management/new"
-    //     },
-    //   },
-    // ],
-    // aoColumns: [
-    //     {
-    //         'mRender': function (data, type, row) {
-    //                             return "<a href='/View/" + row[1] + ">link</a>";
-    //                         }
-    //     },
-    // ]
   });
 });

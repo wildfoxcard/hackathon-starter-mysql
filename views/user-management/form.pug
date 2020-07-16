@@ -1,0 +1,117 @@
+extends ../layouts/_layout
+
+block variables
+  - var activePage = 'user-management';
+
+block specific-js
+  script(type='text/javascript', src='/js/pages/user-management/form.js')
+  if id
+    script.
+      $(function() {
+        app.loadUserForm('#{id}');
+      })
+
+block content
+  .app-title
+    div
+      h1
+        i.fa.fa-address-card
+        if id 
+          | Edit User
+        else
+          | New User
+      p 
+        | Create a user for your organization or company
+
+  .row
+    .col-md-12
+      .tile
+        form( autocomplete="off", id="user_form")
+          .tile-body
+              .form-group
+                  label.col-form-label(for='inputDefault') Name
+                  input#name.form-control(type='text')
+              .form-group
+                  label(for='exampleInputEmail1') Email address
+                  input#email.form-control(type='email', aria-describedby='emailHelp', placeholder='Enter email', name="email")
+                  //- small#emailHelp.form-text.text-muted We'll never share your email with anyone else.
+              .form-group
+                  label(for='exampleInputPassword1') Password
+                  input#password.form-control(type='password', placeholder='Password',autocomplete="new-password")
+
+          .tile-footer
+                  button.btn.btn-primary(type='submit') Submit
+  if id                
+    .row
+      .col-md-12
+        .tile.danger-top
+          .page-header
+            .row
+              .col-lg-12
+                h2.mb-3.line-head#buttons Danger Zone
+            .row
+              .col-lg-12
+                button.btn.btn-danger.pull-right(data-toggle="modal" data-target="#block-user") Block
+                p 
+                  strong Block User 
+                  | - The use will still be invisible to admin(s). But when they sign-in, they will be notified they are blocked from using services. 
+            hr
+            .row
+              .col-lg-12
+                button.btn.btn-danger.pull-right(data-toggle="modal" data-target="#delete-user") Delete
+                p 
+                  strong Block User 
+                  | - Use will not be visible to anyone but database developers. 
+
+    .modal#block-user(tabindex="-1" role="dialog")
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header.bg-danger.text-light
+            h5.modal-title BLOCK USER
+            button.close(type='button', data-dismiss='modal', aria-label='Close')
+              span(aria-hidden='true') ×
+          .modal-body
+            //- p You are about to block the user from services. Please enter 
+            //-   strong "block - 
+            //-     span.user-email
+            //-     | " 
+            //-   | in the input below
+              
+            .form-group.has-danger
+              label.form-control-label(for='inputDanger1') 
+                |You are about to block the user from services. Please enter 
+                strong "block-
+                  span.user-email
+                  | " 
+                | in the input below
+              input#inputInvalid.form-control.is-invalid(type='text')
+          .modal-footer
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+            button.btn.btn-danger(type='button') Block User
+            
+    .modal#delete-user(tabindex="-1" role="dialog")
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header.bg-danger.text-light
+            h5.modal-title DELETE USER
+            button.close(type='button', data-dismiss='modal', aria-label='Close')
+              span(aria-hidden='true') ×
+          .modal-body
+            .form-group.has-danger
+              label.form-control-label(for='inputDanger1') 
+                | You are about to block the user from services. Please enter 
+                strong "delete-
+                  span.user-email
+                  | " 
+                | in the input below
+              input#inputInvalid.form-control.is-invalid(type='text')
+            //- p You are about to block the user from services. Please enter 
+            //-   strong "delete - 
+            //-     span.user-email
+            //-     | " 
+            //-   | in the input below
+          .modal-footer
+            button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+            button.btn.btn-danger(type='button') Delete User
+        
+            

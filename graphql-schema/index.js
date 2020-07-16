@@ -1,5 +1,5 @@
 const { mergeSchemas } = require('graphql-tools');
-const { GraphQLSchema } = require('graphql');
+// const { GraphQLSchema } = require('graphql');
 
 const UserSchema = require('./UsersSchema');
 const ClientsSchema = require('./ClientsSchema');

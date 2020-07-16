@@ -1,12 +1,9 @@
 const crud = require('../Crud');
-const db = require('../../config/db')
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
-let isFirstUser = null;
-
-const User = crud({
-  tableName: "users",
+const Client = crud({
+  tableName: "clients",
   defaultData: {
     comparePassword: (candidatePassword, password, cb) => {
       bcrypt.compare(candidatePassword, password, (err, isMatch) => {
@@ -35,21 +32,7 @@ const User = crud({
   }
 })
 
-User.isFirstUser = async () => {
-  return new Promise((resolve, reject) => {
-    if (isFirstUser === null) {
-      db.query(`SELECT count(*) as count FROM users`, function (err, result, fields) {
-          resolve(result[0].count === 0);
-          isFirstUser = false;
-        }
-      );
-    } else {
-      resolve(isFirstUser);
-    }
-  })
-}
 
 
 
-
-module.exports = User;
+module.exports = Client;
